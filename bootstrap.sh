@@ -35,13 +35,19 @@ cat > "$HOME/.ssh/config" <<EOF
 Host github.com
     IdentityFile $BOOTSTRAP_KEY
 EOF
+chmod 600 "$HOME/.ssh/config"
 
 # Test connection
 echo "Testing GitHub connection..."
-if ssh -T git@github.com 2>&1 | grep -q "You've successfully authenticated"; then
+ssh_output=$(ssh -T git@github.com 2>&1 || true)
+echo "$ssh_output"
+if echo "$ssh_output" | grep -q "successfully authenticated"; then
   echo "GitHub authentication successful!"
 else
-  echo "GitHub authentication failed. Please verify the key was added."
+  echo ""
+  echo "GitHub authentication failed. Please verify:"
+  echo "  1. The key was added to https://github.com/settings/keys"
+  echo "  2. You copied the ENTIRE key including 'ssh-ed25519' prefix"
   exit 1
 fi
 
