@@ -25,7 +25,7 @@ echo "=================================================="
 cat "${BOOTSTRAP_KEY}.pub"
 echo "=================================================="
 echo ""
-read -rp "Press Enter after adding the key to GitHub..."
+read -rp "Press Enter after adding the key to GitHub..." </dev/tty
 
 # Add GitHub to known hosts
 ssh-keyscan -t ed25519 github.com >> "$HOME/.ssh/known_hosts" 2>/dev/null

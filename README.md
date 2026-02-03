@@ -5,7 +5,7 @@ Bootstrap script for setting up new machines without GitHub access.
 ## Usage
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/antonpetrovmain/bootstrap/main/bootstrap.sh | bash
+curl -fsSL -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/antonpetrovmain/bootstrap/main/bootstrap.sh | bash
 ```
 
 ## What it does
