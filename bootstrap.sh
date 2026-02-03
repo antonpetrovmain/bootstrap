@@ -7,6 +7,15 @@ BOOTSTRAP_KEY="$HOME/.ssh/id_ed25519_bootstrap"
 
 echo "=== Dotfiles Bootstrap ==="
 
+# Install Xcode Command Line Tools if needed
+if ! xcode-select -p &>/dev/null; then
+  echo "Installing Xcode Command Line Tools..."
+  xcode-select --install
+  echo "Waiting for Xcode CLT installation to complete..." >/dev/tty
+  echo "Press Enter after the installation finishes..." >/dev/tty
+  read -r </dev/tty
+fi
+
 # Create .ssh directory
 mkdir -p "$HOME/.ssh"
 chmod 700 "$HOME/.ssh"
