@@ -7,8 +7,8 @@ BOOTSTRAP_KEY="$HOME/.ssh/id_ed25519_bootstrap"
 
 echo "=== Dotfiles Bootstrap ==="
 
-# Install Xcode Command Line Tools if needed
-if ! xcode-select -p &>/dev/null; then
+# Install Xcode Command Line Tools if needed (macOS only)
+if [[ "$(uname -s)" == "Darwin" ]] && ! xcode-select -p &>/dev/null; then
   echo "Installing Xcode Command Line Tools..."
   xcode-select --install
   echo "Waiting for Xcode CLT installation to complete..." >/dev/tty
