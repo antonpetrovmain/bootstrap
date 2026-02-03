@@ -38,7 +38,7 @@ EOF
 
 # Test connection
 echo "Testing GitHub connection..."
-if ssh -T git@github.com 2>&1 | grep -q "successfully authenticated"; then
+if ssh -T git@github.com 2>&1 | grep -q "You've successfully authenticated"; then
   echo "GitHub authentication successful!"
 else
   echo "GitHub authentication failed. Please verify the key was added."
