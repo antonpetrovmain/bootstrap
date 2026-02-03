@@ -10,9 +10,10 @@ echo "=== Dotfiles Bootstrap ==="
 # Install Xcode Command Line Tools if needed (macOS only)
 if [[ "$(uname -s)" == "Darwin" ]] && ! xcode-select -p &>/dev/null; then
   echo "Installing Xcode Command Line Tools..."
+  echo "A dialog window should appear - click 'Install' to continue." >/dev/tty
   xcode-select --install
-  echo "Waiting for Xcode CLT installation to complete..." >/dev/tty
-  echo "Press Enter after the installation finishes..." >/dev/tty
+  echo "" >/dev/tty
+  echo "Press Enter after the installation dialog completes..." >/dev/tty
   read -r </dev/tty
 fi
 
@@ -20,45 +21,51 @@ fi
 mkdir -p "$HOME/.ssh"
 chmod 700 "$HOME/.ssh"
 
-# Generate temporary bootstrap key
-if [[ -f "$BOOTSTRAP_KEY" ]]; then
-  echo "Bootstrap key already exists."
-else
-  echo "Generating temporary bootstrap SSH key..."
-  ssh-keygen -t ed25519 -C "bootstrap-$(hostname)-$(date +%Y%m%d)" -f "$BOOTSTRAP_KEY" -N ""
-fi
-
-echo ""
-echo "Add this PUBLIC KEY to GitHub (Settings > SSH Keys):"
-echo "=================================================="
-cat "${BOOTSTRAP_KEY}.pub"
-echo "=================================================="
-echo ""
-echo "Press Enter after adding the key to GitHub..." >/dev/tty
-read -r </dev/tty
-
 # Add GitHub to known hosts
 ssh-keyscan -t ed25519 github.com >> "$HOME/.ssh/known_hosts" 2>/dev/null
 
-# Configure SSH to use bootstrap key for GitHub
-cat > "$HOME/.ssh/config" <<EOF
+# Check if we already have GitHub access
+echo "Checking GitHub access..."
+if ssh -T git@github.com </dev/null 2>&1 | grep -q "successfully authenticated"; then
+  echo "GitHub access already configured!"
+else
+  # Generate temporary bootstrap key
+  if [[ -f "$BOOTSTRAP_KEY" ]]; then
+    echo "Bootstrap key already exists."
+  else
+    echo "Generating temporary bootstrap SSH key..."
+    ssh-keygen -t ed25519 -C "bootstrap-$(hostname)-$(date +%Y%m%d)" -f "$BOOTSTRAP_KEY" -N ""
+  fi
+
+  # Configure SSH to use bootstrap key for GitHub
+  cat > "$HOME/.ssh/config" <<EOF
 Host github.com
     IdentityFile $BOOTSTRAP_KEY
 EOF
-chmod 600 "$HOME/.ssh/config"
+  chmod 600 "$HOME/.ssh/config"
 
-# Test connection
-echo "Testing GitHub connection..."
-ssh_output=$(ssh -T git@github.com </dev/null 2>&1 || true)
-echo "$ssh_output"
-if echo "$ssh_output" | grep -q "successfully authenticated"; then
-  echo "GitHub authentication successful!"
-else
   echo ""
-  echo "GitHub authentication failed. Please verify:"
-  echo "  1. The key was added to https://github.com/settings/keys"
-  echo "  2. You copied the ENTIRE key including 'ssh-ed25519' prefix"
-  exit 1
+  echo "Add this PUBLIC KEY to GitHub (Settings > SSH Keys):"
+  echo "=================================================="
+  cat "${BOOTSTRAP_KEY}.pub"
+  echo "=================================================="
+  echo ""
+  echo "Press Enter after adding the key to GitHub..." >/dev/tty
+  read -r </dev/tty
+
+  # Test connection
+  echo "Testing GitHub connection..."
+  ssh_output=$(ssh -T git@github.com </dev/null 2>&1 || true)
+  echo "$ssh_output"
+  if echo "$ssh_output" | grep -q "successfully authenticated"; then
+    echo "GitHub authentication successful!"
+  else
+    echo ""
+    echo "GitHub authentication failed. Please verify:"
+    echo "  1. The key was added to https://github.com/settings/keys"
+    echo "  2. You copied the ENTIRE key including 'ssh-ed25519' prefix"
+    exit 1
+  fi
 fi
 
 # Clone dotfiles
