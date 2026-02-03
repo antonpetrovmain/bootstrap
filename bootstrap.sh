@@ -39,7 +39,7 @@ chmod 600 "$HOME/.ssh/config"
 
 # Test connection
 echo "Testing GitHub connection..."
-ssh_output=$(ssh -T git@github.com 2>&1 || true)
+ssh_output=$(ssh -T git@github.com </dev/null 2>&1 || true)
 echo "$ssh_output"
 if echo "$ssh_output" | grep -q "successfully authenticated"; then
   echo "GitHub authentication successful!"
